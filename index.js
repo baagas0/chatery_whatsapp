@@ -1,29 +1,33 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const http = require('http');
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./src/config/swagger');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const http = require("http");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./src/config/swagger");
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
 // Import Routes
-const whatsappRoutes = require('./src/routes/whatsapp');
+const whatsappRoutes = require("./src/routes/whatsapp");
 
 // Import Middleware
-const apiKeyAuth = require('./src/middleware/apiKeyAuth');
+const apiKeyAuth = require("./src/middleware/apiKeyAuth");
 
 // Import WebSocket Manager
-const wsManager = require('./src/services/websocket/WebSocketManager');
+const wsManager = require("./src/services/websocket/WebSocketManager");
+
+// Import Scheduler
+const { initScheduler } = require("./src/services/scheduler.service");
+initScheduler();
 
 // Initialize WebSocket
 wsManager.initialize(server, {
-    cors: {
-        origin: process.env.CORS_ORIGIN || '*'
-    }
+  cors: {
+    origin: process.env.CORS_ORIGIN || "*",
+  },
 });
 
 // Middleware
@@ -32,98 +36,98 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from public folder (for media access)
-app.use('/media', express.static(path.join(__dirname, 'public', 'media')));
+app.use("/media", express.static(path.join(__dirname, "public", "media")));
 
 // Serve Dashboard
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
 // Serve WebSocket test page
-app.get('/ws-test', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'websocket-test.html'));
+app.get("/ws-test", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "websocket-test.html"));
 });
 
 // Swagger UI Options
 const swaggerUiOptions = {
-    customCss: `
+  customCss: `
         .swagger-ui .topbar { display: none }
         .swagger-ui .info { margin: 20px 0 }
         .swagger-ui .info .title { color: #25D366 }
     `,
-    customSiteTitle: 'Chatery WhatsApp API - Documentation',
-    customfavIcon: '/media/favicon.ico'
+  customSiteTitle: "Chatery WhatsApp API - Documentation",
+  customfavIcon: "/media/favicon.ico",
 };
 
 // API Documentation (Swagger UI) at root
-app.use('/', swaggerUi.serve);
-app.get('/', swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+app.use("/", swaggerUi.serve);
+app.get("/", swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // Swagger JSON endpoint
-app.get('/api-docs.json', (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
 });
 
-app.get('/api/health', (req, res) => {
-    res.json({
-        success: true,
-        message: 'Server is running',
-        timestamp: new Date().toISOString()
-    });
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Dashboard Login
-app.post('/api/dashboard/login', (req, res) => {
-    const { username, password } = req.body;
-    
-    const validUsername = process.env.DASHBOARD_USERNAME || 'admin';
-    const validPassword = process.env.DASHBOARD_PASSWORD || 'admin123';
-    
-    if (username === validUsername && password === validPassword) {
-        res.json({
-            success: true,
-            message: 'Login successful'
-        });
-    } else {
-        res.status(401).json({
-            success: false,
-            message: 'Invalid username or password'
-        });
-    }
+app.post("/api/dashboard/login", (req, res) => {
+  const { username, password } = req.body;
+
+  const validUsername = process.env.DASHBOARD_USERNAME || "admin";
+  const validPassword = process.env.DASHBOARD_PASSWORD || "admin123";
+
+  if (username === validUsername && password === validPassword) {
+    res.json({
+      success: true,
+      message: "Login successful",
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: "Invalid username or password",
+    });
+  }
 });
 
 // WebSocket Stats
-app.get('/api/websocket/stats', (req, res) => {
-    res.json({
-        success: true,
-        data: wsManager.getStats()
-    });
+app.get("/api/websocket/stats", (req, res) => {
+  res.json({
+    success: true,
+    data: wsManager.getStats(),
+  });
 });
 
 // WhatsApp Routes (with API Key Authentication)
-app.use('/api/whatsapp', apiKeyAuth, whatsappRoutes);
+app.use("/api/whatsapp", apiKeyAuth, whatsappRoutes);
 
 // 404 Handler
 app.use((req, res) => {
-    res.status(404).json({
-        success: false,
-        message: 'Route not found'
-    });
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
 });
 
 // Error Handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-        success: false,
-        message: 'Internal Server Error'
-    });
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+  });
 });
 
 // Start Server
 server.listen(PORT, () => {
-    console.log(`Chatery WhatsApp API running on http://localhost:${PORT}`);
-    console.log(`WebSocket server running on ws://localhost:${PORT}`);
-    console.log(`API Documentation: http://localhost:${PORT}`);
+  console.log(`Chatery WhatsApp API running on http://localhost:${PORT}`);
+  console.log(`WebSocket server running on ws://localhost:${PORT}`);
+  console.log(`API Documentation: http://localhost:${PORT}`);
 });

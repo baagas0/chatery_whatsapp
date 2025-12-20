@@ -26,6 +26,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "node-schedule": "^2.1.1",
+    "openai": "^6.15.0",
     "pino": "^10.1.0",
     "qrcode": "^1.5.4",
     "socket.io": "^4.8.1",
