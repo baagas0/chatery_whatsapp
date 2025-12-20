@@ -129,14 +129,14 @@ const sendMessage = async () => {
 const initScheduler = () => {
   console.log("[Scheduler] Initializing scheduler...");
 
-  // Jadwal: 13:00, 13:30, 14:00, 14:30
-  schedule.scheduleJob("0,30 13-14 * * *", () => {
+  // Jadwal: 13:00, 13:30, 14:00, 14:30 (Senin-Jumat)
+  schedule.scheduleJob("0,30 13-14 * * 1-5", () => {
     console.log("[Scheduler] Triggering scheduled job (13:00-14:30 range)...");
     sendMessage();
   });
 
-  // Jadwal: 15:00
-  schedule.scheduleJob("0 15 * * *", () => {
+  // Jadwal: 15:00 (Senin-Jumat)
+  schedule.scheduleJob("0 15 * * 1-5", () => {
     console.log("[Scheduler] Triggering scheduled job (15:00)...");
     sendMessage();
   });
@@ -146,7 +146,7 @@ const initScheduler = () => {
   //   sendMessage();
   // });
 
-  console.log("[Scheduler] Jobs scheduled for 13:00, 13:30, 14:00, 14:30, 15:00 daily.");
+  console.log("[Scheduler] Jobs scheduled for 13:00, 13:30, 14:00, 14:30, 15:00 (Mon-Fri).");
 };
 
 module.exports = {

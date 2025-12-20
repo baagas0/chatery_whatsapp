@@ -9,7 +9,7 @@ class AIClient {
 
     try {
       const { GoogleGenAI } = await import("@google/genai");
-      this.genAI = new GoogleGenAI({ apiKey: "AIzaSyCl8M1NB2W8Cnn9mzxvTHyZngyI7ARURik" });
+      this.genAI = new GoogleGenAI({ apiKey: "" });
       this.initialized = true;
     } catch (error) {
       console.error("Failed to initialize AI client:", error);
