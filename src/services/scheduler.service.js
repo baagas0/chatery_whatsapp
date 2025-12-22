@@ -2,6 +2,7 @@ const schedule = require("node-schedule");
 const whatsappManager = require("./whatsapp");
 const { aiClient } = require("./ai.service");
 
+const TARGET_PHONE_MARIO = "6281247430546";
 const TARGET_PHONE = "6289506373551";
 const MESSAGE = "ayangg mammm";
 
@@ -126,6 +127,35 @@ const sendMessage = async () => {
   }
 };
 
+// NOTIFY SEND TO MARIO
+const sendMessageMario = async () => {
+  try {
+    // Get all connected sessions
+    const sessions = whatsappManager.getAllSessions();
+    const connectedSession = sessions.find((s) => s.isConnected);
+
+    if (!connectedSession) {
+      console.log("[Scheduler] No connected session found. Skipping message send.");
+      return;
+    }
+
+    const session = whatsappManager.getSession(connectedSession.sessionId);
+    if (!session) {
+      console.log(`[Scheduler] Session ${connectedSession.sessionId} not found (unexpected).`);
+      return;
+    }
+
+    const text = "[notify] mar ayo meet simrs bagian satu sehat, ben cepet bar awkwkwk";
+
+    console.log(`[Scheduler] Sending message to ${TARGET_PHONE_MARIO} using session ${session.sessionId}...`);
+
+    await session.sendTextMessage(TARGET_PHONE_MARIO, text, 1200);
+    console.log("[Scheduler] Message sent successfully.");
+  } catch (error) {
+    console.error("[Scheduler] Error sending message:", error);
+  }
+};
+
 const initScheduler = () => {
   console.log("[Scheduler] Initializing scheduler...");
 
@@ -141,12 +171,24 @@ const initScheduler = () => {
     sendMessage();
   });
 
-  // schedule.scheduleJob("* * * * *", () => {
-  //   console.log("[Scheduler] TEST");
-  //   sendMessage();
-  // });
+  console.log("[Scheduler] NOTIFY MARIO");
+  schedule.scheduleJob("* * * * *", () => {
+    const date = new Date();
+    const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+    const plusSevenTime = new Date(utcTime + 7 * 3600000);
 
-  console.log("[Scheduler] Jobs scheduled for 13:00, 13:30, 14:00, 14:30, 15:00 (Mon-Fri).");
+    const hour = plusSevenTime.getHours();
+    const minute = plusSevenTime.getMinutes();
+
+    const isPlusSeven = (hour === 20 && minute >= 55) || (hour === 21 && minute < 5);
+
+    if (isPlusSeven) {
+      console.log(`[Scheduler] Triggering Mario message (${hour}:${minute} +7)...`);
+      sendMessageMario();
+    }
+  });
+
+  console.log("[Scheduler] Mario message scheduler active for 20:55-21:05 (+7 timezone).");
 };
 
 module.exports = {
