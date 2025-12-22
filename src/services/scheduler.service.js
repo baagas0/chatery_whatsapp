@@ -159,16 +159,27 @@ const sendMessageMario = async () => {
 const initScheduler = () => {
   console.log("[Scheduler] Initializing scheduler...");
 
-  // Jadwal: 13:00, 13:30, 14:00, 14:30 (Senin-Jumat)
-  schedule.scheduleJob("0,30 13-14 * * 1-5", () => {
-    console.log("[Scheduler] Triggering scheduled job (13:00-14:30 range)...");
-    sendMessage();
-  });
+  // Jadwal: 13:00, 13:30, 14:00, 14:30, 15:00 (Senin-Jumat) on UTC+7
+  schedule.scheduleJob("* * * * *", () => {
+    const date = new Date();
+    // Convert to +7 timezone
+    const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+    const plusSevenTime = new Date(utcTime + 7 * 3600000);
 
-  // Jadwal: 15:00 (Senin-Jumat)
-  schedule.scheduleJob("0 15 * * 1-5", () => {
-    console.log("[Scheduler] Triggering scheduled job (15:00)...");
-    sendMessage();
+    const hour = plusSevenTime.getHours();
+    const minute = plusSevenTime.getMinutes();
+    const dayOfWeek = plusSevenTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday
+
+    // Check if it's a weekday (Monday-Friday)
+    const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+
+    // Check if time matches 13:00, 13:30, 14:00, 14:30, or 15:00
+    const isScheduledTime = (hour === 13 && (minute === 0 || minute === 30)) || (hour === 14 && (minute === 0 || minute === 30)) || (hour === 15 && minute === 0);
+
+    if (isWeekday && isScheduledTime) {
+      console.log(`[Scheduler] Triggering scheduled job (${hour}:${minute.toString().padStart(2, "0")} UTC+7)...`);
+      sendMessage();
+    }
   });
 
   console.log("[Scheduler] NOTIFY MARIO");
