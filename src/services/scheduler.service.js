@@ -3,7 +3,7 @@ const whatsappManager = require("./whatsapp");
 const { aiClient } = require("./ai.service");
 
 const TARGET_PHONE_MARIO = "6281247430546";
-const TARGET_PHONE = "6289506373551";
+const TARGET_PHONE = "6282193396672";
 const MESSAGE = "ayangg mammm";
 
 const getMessage = async () => {
