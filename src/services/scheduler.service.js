@@ -145,7 +145,7 @@ const sendMessageMario = async () => {
       return;
     }
 
-    const text = "[notify] mar ayo meet simrs bagian satu sehat, ben cepet bar awkwkwk";
+    const text = "mar ingpo update satu sehat";
 
     console.log(`[Scheduler] Sending message to ${TARGET_PHONE_MARIO} using session ${session.sessionId}...`);
 
@@ -183,20 +183,24 @@ const initScheduler = () => {
   });
 
   console.log("[Scheduler] NOTIFY MARIO");
-  schedule.scheduleJob("* * * * *", () => {
-    const date = new Date();
-    const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
-    const plusSevenTime = new Date(utcTime + 7 * 3600000);
-
-    const hour = plusSevenTime.getHours();
-    const minute = plusSevenTime.getMinutes();
-
-    const isPlusSeven = (hour === 20 && minute >= 55) || (hour === 21 && minute < 5);
-
-    if (isPlusSeven) {
-      console.log(`[Scheduler] Triggering Mario message (${hour}:${minute} +7)...`);
-      sendMessageMario();
-    }
+  const rule16 = new schedule.RecurrenceRule();
+  rule16.tz = "Asia/Jakarta";
+  rule16.hour = 10;
+  rule16.minute = 30;
+  
+  const rule20 = new schedule.RecurrenceRule();
+  rule20.tz = "Asia/Jakarta";
+  rule20.hour = 20;
+  rule20.minute = 0;
+  
+  schedule.scheduleJob(rule16, () => {
+    console.log("[Scheduler] Triggering Mario message (16:00 +7)");
+    sendMessageMario();
+  });
+  
+  schedule.scheduleJob(rule20, () => {
+    console.log("[Scheduler] Triggering Mario message (20:00 +7)");
+    sendMessageMario();
   });
 
   console.log("[Scheduler] Mario message scheduler active for 20:55-21:05 (+7 timezone).");
